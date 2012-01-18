@@ -20,24 +20,22 @@ namespace Green
 			VirtualMachine();
 			~VirtualMachine();
 
-			void addClass(Class * clazz);
+			void addClass(const Class * clazz);
 
-			void run(Class * clazz);
+			void run(const Class * clazz);
 
 
 		private:
 			Q_DISABLE_COPY(VirtualMachine)
 
-			QStack<Frame*> frames;
-			QHash<QString, Class*> classes;
-
-			void runMethod(const Class * clazz, const Method * method);
+			QStack<Frame *> frames;
+			QHash<QString, const Class *> classes;
 	};
 
 
 	inline VirtualMachine::~VirtualMachine() { }
 
-	inline void VirtualMachine::addClass(Class * clazz)
+	inline void VirtualMachine::addClass(const Class * clazz)
 	{
 		classes.insert(clazz->getName(), clazz);
 	}

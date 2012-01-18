@@ -1,4 +1,5 @@
 #include "Types/Integer.h"
+#include "Types/Object.h"
 #include "Types/String.h"
 #include "VirtualMachine.h"
 
@@ -7,11 +8,12 @@ namespace Green
 {
 	VirtualMachine::VirtualMachine()
 	{
+		addClass(Type::Object::createClass());
 		addClass(Type::String::createClass());
 		addClass(Type::Integer::createClass());
 	}
 
-	void VirtualMachine::run(Class * clazz)
+	void VirtualMachine::run(const Class * clazz)
 	{
 		Q_ASSERT(clazz != NULL);
 
@@ -31,18 +33,10 @@ namespace Green
 			return; // @todo exception?
 		}
 
-		runMethod(clazz, mainMethod);
-	}
-
-	void VirtualMachine::runMethod(const Class * clazz, const Method * method)
-	{
-		Q_ASSERT(clazz != NULL);
-		Q_ASSERT(method != NULL);
-
-		// create a frame
-		Frame * frame = new Frame(this, clazz, method, NULL);
-		frames.push(frame);
-		method->execute(frame);
+		// create frame and run
+		Frame frame(this, clazz, mainMethod, NULL);
+		frames.push(&frame);
+		mainMethod->execute(&frame);
 		frames.pop();
 	}
 }

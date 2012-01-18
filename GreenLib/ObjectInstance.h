@@ -16,8 +16,8 @@ namespace Green
 
 			const Class * getClass() const;
 
-			void * getData() const;
-			void setData(void * data);
+			void * getData(const Class * clazz) const;
+			void setData(const Class * clazz, void * data);
 
 			ObjectInstance * getField(const QString& name) const;
 			void setField(const QString& name, ObjectInstance * value);
@@ -29,7 +29,7 @@ namespace Green
 			Q_DISABLE_COPY(ObjectInstance)
 
 			const Class * const clazz;
-			void * data;
+			QHash<const Class *, void *> data;
 			QHash<QString, ObjectInstance *> fields;
 			ObjectInstance * parent;
 	};
@@ -50,14 +50,14 @@ namespace Green
 		return clazz;
 	}
 
-	inline void * ObjectInstance::getData() const
+	inline void * ObjectInstance::getData(const Class * clazz) const
 	{
-		return data;
+		return data.value(clazz, NULL);
 	}
 
-	inline void ObjectInstance::setData(void * data)
+	inline void ObjectInstance::setData(const Class * clazz, void * data)
 	{
-		this->data = data;
+		this->data.insert(clazz, data);
 	}
 
 	inline ObjectInstance * ObjectInstance::getField(const QString& name) const

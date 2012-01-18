@@ -60,6 +60,7 @@ echo          return Green::KEYWORD_ECHO;
 "-"           return Green::SYM_MINUS;
 "*"           return Green::SYM_MULTIPLY;
 "/"           return Green::SYM_DIVIDE;
+"%"           return Green::SYM_MODULUS;
 "."           return Green::SYM_PERIOD;
 "::"          return Green::SYM_SCOPE_RESOLUTION;
 

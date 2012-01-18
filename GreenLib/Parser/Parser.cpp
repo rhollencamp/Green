@@ -3,6 +3,7 @@
 #include "Class/Class.h"
 #include "Expression/AssignmentExpression.h"
 #include "Expression/ConstantIntegerExpression.h"
+#include "Expression/InstanceMethodExpression.h"
 #include "Expression/VariableExpression.h"
 #include "Parser.h"
 #include "Statement/EchoStatement.h"
@@ -60,7 +61,7 @@ namespace Green
 		readNextToken();
 
 		// create new class structure
-		newClass = new Class(className, packageName);
+		newClass = new Class(className, packageName, NULL); // @todo parent
 
 		// class declaration body
 		expectToken(SYM_CURLY_OPEN, "Expected opening curly bracket");
@@ -129,9 +130,7 @@ namespace Green
 		}
 		expectToken(SYM_CURLY_CLOSE, "Expected closing curly bracket");
 
-		Method * ret = new Method(name, bodyStatements);
-		ret->setAccessModifier(accessModifier);
-		ret->setIsStatic(isStatic);
+		Method * ret = new Method(name, bodyStatements, accessModifier, isStatic);
 		return ret;
 	}
 
@@ -178,31 +177,36 @@ namespace Green
 		switch (op) {
 			case SYM_ASSIGNMENT: {
 				return new AssignmentExpression(lhs, rhs);
-				//return new ObjectAssignmentExpression(lhs, rhs);
 			}
 
 			case SYM_PLUS: {
-				//ArgumentListExpression * argList = new ArgumentListExpression();
-				//argList->AddArgument(rhs);
-				//return new InstanceFunctionExpression(lhs, "Operator+", argList);
+				InstanceMethodExpression * ret = new InstanceMethodExpression("__operator+", lhs);
+				ret->addArgument(rhs);
+				return ret;
 			}
 
 			case SYM_MINUS: {
-				//ArgumentListExpression * argList = new ArgumentListExpression();
-				//argList->AddArgument(rhs);
-				//return new InstanceFunctionExpression(lhs, "Operator-", argList);
+				InstanceMethodExpression * ret = new InstanceMethodExpression("__operator-", lhs);
+				ret->addArgument(rhs);
+				return ret;
 			}
 
 			case SYM_MULTIPLY: {
-				//ArgumentListExpression * argList = new ArgumentListExpression();
-				//argList->AddArgument(rhs);
-				//return new InstanceFunctionExpression(lhs, "Operator*", argList);
+				InstanceMethodExpression * ret = new InstanceMethodExpression("__operator*", lhs);
+				ret->addArgument(rhs);
+				return ret;
 			}
 
 			case SYM_DIVIDE: {
-				//ArgumentListExpression * argList = new ArgumentListExpression();
-				//argList->AddArgument(rhs);
-				//return new InstanceFunctionExpression(lhs, "Operator/", argList);
+				InstanceMethodExpression * ret = new InstanceMethodExpression("__operator/", lhs);
+				ret->addArgument(rhs);
+				return ret;
+			}
+
+			case SYM_MODULUS: {
+				InstanceMethodExpression * ret = new InstanceMethodExpression("__operator%", lhs);
+				ret->addArgument(rhs);
+				return ret;
 			}
 
 			case SYM_PERIOD: {
@@ -299,7 +303,8 @@ namespace Green
 
 		// variable
 		if (currentToken == VARIABLE) {
-			ret = new VariableExpression(fileScanner->getText());
+			ret = new VariableExpression(fileScanner->getText().mid(1));
+			readNextToken();
 		}
 
 		// identifier
@@ -312,18 +317,15 @@ namespace Green
 		// constant integer
 		if (currentToken == CONSTANT_INT) {
 			ret = new ConstantIntegerExpression(atoi(fileScanner->getText().toLatin1()));
+			readNextToken();
 		}
 
 		// expression inside parens
-		//if (AcceptToken(SYM_PAREN_OPEN)) {
-		//	Expression * ret = ParseExpression(ParseExpressionTerminal(), 0);
-		//	ExpectToken(SYM_PAREN_CLOSE, "Expected closing parenthesis");
-		//	return ret;
-		//}
-
-		if (ret != NULL) {
-			readNextToken();
+		if (acceptToken(SYM_PAREN_OPEN)) {
+			ret = parseExpression(parseExpressionTerminal(), 0);
+			expectToken(SYM_PAREN_CLOSE, "Expected closing parenthesis");
 		}
+
 		return ret;
 	}
 }

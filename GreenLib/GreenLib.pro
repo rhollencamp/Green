@@ -20,7 +20,9 @@ SOURCES += \
     Class/Method.cpp \
     Statement/EchoStatement.cpp \
     Types/Integer.cpp \
-    Expression/ConstantIntegerExpression.cpp
+    Expression/ConstantIntegerExpression.cpp \
+    Expression/InstanceMethodExpression.cpp \
+    Types/Object.cpp
 
 HEADERS += \
 	Parser/Scanner.h \
@@ -43,7 +45,9 @@ HEADERS += \
     Types/String.h \
     Statement/EchoStatement.h \
     Types/Integer.h \
-    Expression/ConstantIntegerExpression.h
+    Expression/ConstantIntegerExpression.h \
+    Expression/InstanceMethodExpression.h \
+    Types/Object.h
 
 OTHER_FILES += \
 	Parser/Scanner.l

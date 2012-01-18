@@ -11,7 +11,7 @@ namespace Green
 	class Class
 	{
 		public:
-			Class(const QString& name, const QString& package);
+			Class(const QString& name, const QString& package, const Class * parent);
 
 			const QString getName() const;
 			const QString getPackage() const;
@@ -22,18 +22,21 @@ namespace Green
 			void addMethod(const Method* const);
 			const Method* getMethod(const QString& name) const;
 
+			const Class * getParent() const;
+
 
 		private:
 			Q_DISABLE_COPY(Class)
 
 			QString name;
 			QString package;
+			const Class * parent;
 			QHash<QString, const Field*> fields;
 			QHash<QString, const Method*> methods;
 	};
 
-	inline Class::Class(const QString& name, const QString& package)
-		: name(name), package(package)
+	inline Class::Class(const QString& name, const QString& package, const Class * parent)
+		: name(name), package(package), parent(parent)
 	{
 	}
 
@@ -64,6 +67,15 @@ namespace Green
 
 	inline const Method* Class::getMethod(const QString& name) const
 	{
-		return methods.value(name, NULL);
+		const Method * ret = methods.value(name, NULL);
+		if (ret == NULL && parent != NULL) {
+			ret = parent->getMethod(name);
+		}
+		return ret;
+	}
+
+	inline const Class * Class::getParent() const
+	{
+		return parent;
 	}
 }

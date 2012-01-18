@@ -7,9 +7,15 @@ namespace Green
 {
 	namespace Type
 	{
+		namespace Object
+		{
+			extern Class clazz;
+		}
+
+
 		namespace String
 		{
-			static Class clazz("String", "green.lang");
+			static Class clazz("String", "green.lang", &Object::clazz);
 
 			/**
 			 * toString method
@@ -18,7 +24,7 @@ namespace Green
 			{
 				return frame->getThis();
 			}
-			static Method toStringMethod("toString", &toStringImpl);
+			static Method toStringMethod("toString", &toStringImpl, PUBLIC_ACCESS, false);
 
 			/**
 			 * constructor method
@@ -26,22 +32,17 @@ namespace Green
 			static ObjectInstance * ctorImpl(Frame * frame)
 			{
 				ObjectInstance * thisPtr = frame->getThis();
-				thisPtr->setData(new QString());
+				thisPtr->setData(&clazz, new QString());
 				return thisPtr;
 			}
-			static Method ctorMethod("__construct", &ctorImpl);
+			static Method ctorMethod("__construct", &ctorImpl, PUBLIC_ACCESS, false);
 
 			/**
 			 * Build and return the String class instance
 			 */
 			Class * createClass()
 			{
-				// ctor
-				ctorMethod.setAccessModifier(PUBLIC_ACCESS);
 				clazz.addMethod(&ctorMethod);
-
-				// toString
-				toStringMethod.setAccessModifier(PUBLIC_ACCESS);
 				clazz.addMethod(&toStringMethod);
 
 				return &clazz;
@@ -52,7 +53,7 @@ namespace Green
 			 */
 			QString getQString(ObjectInstance * object)
 			{
-				QString * data = (QString *)object->getData();
+				QString * data = (QString *)object->getData(&clazz);
 				return QString(*data);
 			}
 
@@ -62,7 +63,7 @@ namespace Green
 			ObjectInstance * instantiate(const QString& initial)
 			{
 				ObjectInstance * ret = new ObjectInstance(&clazz);
-				ret->setData(new QString(initial));
+				ret->setData(&clazz, new QString(initial));
 				return ret;
 			}
 		}

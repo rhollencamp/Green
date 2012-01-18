@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QLinkedList>
+#include <QList>
 #include <QString>
 #include "AccessModifier.h"
 
@@ -22,17 +23,16 @@ namespace Green
 	class Method
 	{
 		public:
-			explicit Method(const QString& name, StaticMethodBody body);
-			explicit Method(const QString& name, QLinkedList<Statement*> body);
+			explicit Method(const QString& name, StaticMethodBody body, const AccessModifier access, bool isStatic);
+			explicit Method(const QString& name, QLinkedList<Statement*> body, const AccessModifier access, bool isStatic);
 			~Method();
 
 			QString getName() const;
-
-			void setIsStatic(const bool isStatic);
 			bool getIsStatic() const;
-
-			void setAccessModifier(const AccessModifier access);
 			AccessModifier getAccessModifier() const;
+			QList<QString> getParameters() const;
+
+			void addParameter(const QString& param);
 
 			ObjectInstance * execute(Frame * frame) const;
 
@@ -43,19 +43,20 @@ namespace Green
 			QString name;
 			bool isStatic;
 			AccessModifier access;
+			QList<QString> parameters;
 
 			StaticMethodBody staticBody;
 			QLinkedList<Statement*> dynamicBody;
 	};
 
 
-	inline Method::Method(const QString& name, QLinkedList<Statement *> body)
-		: name(name), dynamicBody(body), staticBody(NULL)
+	inline Method::Method(const QString& name, QLinkedList<Statement *> body, const AccessModifier access, bool isStatic)
+		: name(name), dynamicBody(body), staticBody(NULL), access(access), isStatic(isStatic)
 	{
 	}
 
-	inline Method::Method(const QString& name, StaticMethodBody body)
-		: name(name), staticBody(body)
+	inline Method::Method(const QString& name, StaticMethodBody body, const AccessModifier access, bool isStatic)
+		: name(name), staticBody(body), access(access), isStatic(isStatic)
 	{
 	}
 
@@ -66,23 +67,23 @@ namespace Green
 		return name;
 	}
 
-	inline void Method::setIsStatic(const bool isStatic)
-	{
-		this->isStatic = isStatic;
-	}
-
 	inline bool Method::getIsStatic() const
 	{
 		return isStatic;
 	}
 
-	inline void Method::setAccessModifier(const AccessModifier access)
-	{
-		this->access = access;
-	}
-
 	inline AccessModifier Method::getAccessModifier() const
 	{
 		return access;
+	}
+
+	inline void Method::addParameter(const QString& param)
+	{
+		parameters.append(param);
+	}
+
+	inline QList<QString> Method::getParameters() const
+	{
+		return parameters;
 	}
 }

@@ -16,6 +16,7 @@ namespace Green
 
 			case SYM_MULTIPLY:
 			case SYM_DIVIDE:
+			case SYM_MODULUS:
 				return 3;
 
 			case SYM_PLUS:
@@ -38,6 +39,7 @@ namespace Green
 			case SYM_MINUS:
 			case SYM_MULTIPLY:
 			case SYM_DIVIDE:
+			case SYM_MODULUS:
 			case SYM_ASSIGNMENT:
 			case SYM_PERIOD:
 			case SYM_SCOPE_RESOLUTION:

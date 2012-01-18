@@ -1,6 +1,7 @@
 #include "Class/Class.h"
 #include "Frame.h"
 #include "Integer.h"
+#include "Object.h"
 #include "String.h"
 
 
@@ -8,20 +9,26 @@ namespace Green
 {
 	namespace Type
 	{
+		namespace Object
+		{
+			extern Class clazz;
+		}
+
+
 		namespace Integer
 		{
-			static Class clazz("Integer", "green.lang");
+			Class clazz("Integer", "green.lang", &Object::clazz);
 
 			/**
 			 * toString method
 			 */
 			static ObjectInstance * toStringImpl(Frame * frame)
 			{
-				int * data = (int*)frame->getThis()->getData();
+				int * data = (int*)frame->getThis()->getData(&clazz);
 				QString str = QString::number(*data);
 				return String::instantiate(str);
 			}
-			static Method toStringMethod("toString", &toStringImpl);
+			static Method toStringMethod("toString", &toStringImpl, PUBLIC_ACCESS, false);
 
 			/**
 			 * constructor method
@@ -31,23 +38,129 @@ namespace Green
 				ObjectInstance * thisPtr = frame->getThis();
 				int * data = new int;
 				*data = 0;
-				thisPtr->setData(data);
+				thisPtr->setData(&clazz, data);
 				return thisPtr;
 			}
-			static Method ctorMethod("__construct", &ctorImpl);
+			static Method ctorMethod("__construct", &ctorImpl, PUBLIC_ACCESS, false);
+
+			/**
+			 * operator+ method
+			 */
+			static ObjectInstance * operatorPlusImpl(Frame * frame)
+			{
+				int lhsInt = getInt(frame->getThis());
+				ObjectInstance * rhs = frame->getLocalVar("rhs");
+				const Class * rhsClass = rhs->getClass();
+
+				// int
+				if (rhsClass == &clazz) {
+					int rhsInt = getInt(rhs);
+					return instantiate(lhsInt + rhsInt);
+				}
+
+				Q_ASSERT(false); // @todo synatx error
+			}
+			static Method operatorPlusMethod("__operator+", &operatorPlusImpl, PUBLIC_ACCESS, false);
+
+			/**
+			 * operator- method
+			 */
+			static ObjectInstance * operatorMinusImpl(Frame * frame)
+			{
+				int lhsInt = getInt(frame->getThis());
+				ObjectInstance * rhs = frame->getLocalVar("rhs");
+				const Class * rhsClass = rhs->getClass();
+
+				// int
+				if (rhsClass == &clazz) {
+					int rhsInt = getInt(rhs);
+					return instantiate(lhsInt - rhsInt);
+				}
+
+				Q_ASSERT(false); // @todo syntax error
+			}
+			static Method operatorMinusMethod("__operator-", &operatorMinusImpl, PUBLIC_ACCESS, false);
+
+			/**
+			 * operator/ method
+			 */
+			static ObjectInstance * operatorDivImpl(Frame * frame)
+			{
+				int lhsInt = getInt(frame->getThis());
+				ObjectInstance * rhs = frame->getLocalVar("rhs");
+				const Class * rhsClass = rhs->getClass();
+
+				// int
+				if (rhsClass == &clazz) {
+					int rhsInt = getInt(rhs);
+					Q_ASSERT(rhsInt != 0);
+					return instantiate(lhsInt / rhsInt);
+				}
+
+				Q_ASSERT(false); // @todo syntax error
+			}
+			static Method operatorDivMethod("__operator/", &operatorDivImpl, PUBLIC_ACCESS, false);
+
+			/**
+			 * operator* method
+			 */
+			static ObjectInstance * operatorMultImpl(Frame * frame)
+			{
+				int lhsInt = getInt(frame->getThis());
+				ObjectInstance * rhs = frame->getLocalVar("rhs");
+				const Class * rhsClass = rhs->getClass();
+
+				// int
+				if (rhsClass == &clazz) {
+					int rhsInt = getInt(rhs);
+					return instantiate(lhsInt * rhsInt);
+				}
+
+				Q_ASSERT(false); // @todo syntax error
+			}
+			static Method operatorMultMethod("__operator*", &operatorMultImpl, PUBLIC_ACCESS, false);
+
+			/**
+			 * operator% method
+			 */
+			static ObjectInstance * operatorModImpl(Frame * frame)
+			{
+				int lhsInt = getInt(frame->getThis());
+				ObjectInstance * rhs = frame->getLocalVar("rhs");
+				const Class * rhsClass = rhs->getClass();
+
+				// int
+				if (rhsClass == &clazz) {
+					int rhsInt = getInt(rhs);
+					return instantiate(lhsInt % rhsInt);
+				}
+
+				Q_ASSERT(false); // @todo syntax error
+			}
+			static Method operatorModMethod("__operator%", &operatorModImpl, PUBLIC_ACCESS, false);
 
 			/**
 			 * Build up and return class
 			 */
 			Class * createClass()
 			{
-				// ctor
-				ctorMethod.setAccessModifier(PUBLIC_ACCESS);
 				clazz.addMethod(&ctorMethod);
-
-				// toString
-				toStringMethod.setAccessModifier(PUBLIC_ACCESS);
 				clazz.addMethod(&toStringMethod);
+
+				operatorPlusMethod.addParameter("rhs");
+				clazz.addMethod(&operatorPlusMethod);
+
+				operatorMinusMethod.addParameter("rhs");
+				clazz.addMethod(&operatorMinusMethod);
+
+				operatorDivMethod.addParameter("rhs");
+				clazz.addMethod(&operatorDivMethod);
+
+				operatorMultMethod.addParameter("rhs");
+				clazz.addMethod(&operatorMultMethod);
+
+				operatorModMethod.addParameter("rhs");
+				clazz.addMethod(&operatorModMethod);
 
 				return &clazz;
 			}
@@ -60,7 +173,7 @@ namespace Green
 				ObjectInstance * ret = new ObjectInstance(&clazz);
 				int * data = new int;
 				*data = value;
-				ret->setData(data);
+				ret->setData(&clazz, data);
 				return ret;
 			}
 
@@ -69,7 +182,7 @@ namespace Green
 			 */
 			int getInt(ObjectInstance * object)
 			{
-				int * data = (int*)object->getData();
+				int * data = (int*)object->getData(&clazz);
 				return *data;
 			}
 		}
